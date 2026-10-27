@@ -40,11 +40,14 @@ jobs:
           }
           $targetTag = "v$version"
           $tagCommit = (git rev-list -n 1 "$targetTag" 2>$null)
-          $headCommit = (git rev-parse HEAD)
-          if ($tagCommit -and $tagCommit -ne $headCommit) {
-            throw "Build commit $headCommit does not match tag $targetTag ($tagCommit)"
+          if (-not $tagCommit) {
+            throw "Release blocked: Git tag $targetTag does not exist in repository."
           }
-          Write-Host "Verified release track: $mode for version: $version (Commit: $headCommit)"
+          $headCommit = (git rev-parse HEAD)
+          if ($tagCommit -ne $headCommit) {
+            throw "Release blocked: Build commit $headCommit does not match tag $targetTag ($tagCommit)."
+          }
+          Write-Host "Verified git tag $targetTag exists and exactly matches HEAD commit ($headCommit)."
 
       - name: Install dependencies
         run: npm ci
@@ -70,10 +73,15 @@ jobs:
           ELECTRON_BUILDER_UPDATE_SIGN_KEY: ${{ secrets.UPDATE_MANIFEST_SIGNING_KEY }}
         run: |
           $ErrorActionPreference = 'Stop'
-          if (-not $env:CSC_LINK -or -not $env:WINDOWS_CERTIFICATE_PUBLISHER) {
-            throw 'Signed release blocked: Windows code signing certificate and publisher identity are required.'
+          $builderMajor = [int]((node -p "require('electron-builder/package.json').version").Split('.')[0])
+          $updaterMajor = [int]((node -p "require('electron-updater/package.json').version").Split('.')[0])
+          if ($builderMajor -lt 27 -or $updaterMajor -lt 7) {
+            throw "Signed auto-update track blocked: Signed Update Manifests require verified electron-builder 27 and electron-updater 7 migration. Current versions: builder v$builderMajor, updater v$updaterMajor. Automated in-app update releases remain blocked until manifest signing is finalized."
           }
-          Write-Host "Code signing credentials verified for publisher: $env:WINDOWS_CERTIFICATE_PUBLISHER"
+          if (-not $env:CSC_LINK -or -not $env:WINDOWS_CERTIFICATE_PUBLISHER -or -not $env:ELECTRON_BUILDER_UPDATE_SIGN_KEY) {
+            throw 'Signed auto-update track blocked: Windows code signing certificate, publisher identity, and ELECTRON_BUILDER_UPDATE_SIGN_KEY are required.'
+          }
+          Write-Host "Code signing credentials and update key verified for publisher: $env:WINDOWS_CERTIFICATE_PUBLISHER"
 
       - name: Build Windows release assets
         run: npm run build:win -- --publish never
@@ -106,6 +114,12 @@ jobs:
               throw "Signer Subject ($($sig.SignerCertificate.Subject)) does not match expected publisher ($env:WINDOWS_CERTIFICATE_PUBLISHER)"
             }
             Write-Host "Authenticode signature verified valid for: $($sig.SignerCertificate.Subject)"
+
+            $manifest = Get-Content 'release/latest.yml' -Raw
+            if ($manifest -notmatch '(?m)^signature:\s*.+') {
+              throw "Update Manifest verification failed: latest.yml does not contain a verified Ed25519 signature block."
+            }
+            Write-Host "Update Manifest Ed25519 signature block verified in latest.yml."
           }
 
       - name: Publish verified release assets
@@ -164,6 +178,9 @@ jobs:
           if ($diff) {
             git commit -m "docs: activate direct download badge in READMEs for published stable release"
             git push origin main
+            if ($LASTEXITCODE -ne 0) {
+              throw "CRITICAL PARTIAL STATE: Stable release was published, but pushing updated README badges to origin/main failed (Exit code: $LASTEXITCODE). Run manual reconciliation: git push origin main"
+            }
             Write-Host "README download badges updated to live Setup.exe link."
           } else {
             Write-Host "README download badges already up to date."

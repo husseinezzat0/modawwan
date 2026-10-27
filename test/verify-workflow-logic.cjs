@@ -40,15 +40,45 @@ const arFreeCount = (arSubMatches[0].match(/مجاني ومفتوح المصدر
 assert.equal(arFreeCount, 1, 'مجاني ومفتوح المصدر must appear exactly once in sub block');
 console.log('✓ README.ar.md activation logic: PASS (no duplication)');
 
-console.log('--- 2. Testing version restriction for manual-initial ---');
+console.log('--- 2. Testing version and tag restriction logic ---');
 const pkgVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
-function checkManualMode(mode, version) {
+function verifyReleaseTarget(mode, version, tagCommit, headCommit) {
   if (mode === 'manual-initial') {
     if (version !== '1.2.0') throw new Error(`manual-initial track restricted to 1.2.0. Version ${version} rejected.`);
   }
+  if (!tagCommit) throw new Error(`Release blocked: Git tag v${version} does not exist.`);
+  if (tagCommit !== headCommit) throw new Error(`Release blocked: Build commit ${headCommit} does not match tag (${tagCommit}).`);
 }
-assert.doesNotThrow(() => checkManualMode('manual-initial', pkgVersion), '1.2.0 should be accepted for manual-initial');
-assert.throws(() => checkManualMode('manual-initial', '1.3.0'), /manual-initial track restricted to 1.2.0/);
-console.log('✓ Version restriction logic: PASS');
+
+// 1. Valid matching tag and head
+assert.doesNotThrow(() => verifyReleaseTarget('manual-initial', '1.2.0', 'c3a47cf', 'c3a47cf'));
+// 2. Reject if version != 1.2.0 for manual-initial
+assert.throws(() => verifyReleaseTarget('manual-initial', '1.3.0', 'c3a47cf', 'c3a47cf'), /manual-initial track restricted to 1.2.0/);
+// 3. Reject if tag does not exist
+assert.throws(() => verifyReleaseTarget('manual-initial', '1.2.0', '', 'c3a47cf'), /Git tag v1.2.0 does not exist/);
+// 4. Reject if tag commit != head commit
+assert.throws(() => verifyReleaseTarget('manual-initial', '1.2.0', 'old_commit', 'c3a47cf'), /does not match tag/);
+console.log('✓ Tag and version strict verification logic: PASS');
+
+console.log('--- 3. Testing signed-auto-update manifest gate logic ---');
+function verifySignedAutoUpdateGates(builderMajor, updaterMajor, hasCert, hasPublisher, hasKey, manifestHasSignature) {
+  if (builderMajor < 27 || updaterMajor < 7) {
+    throw new Error(`Signed auto-update track blocked: Signed Update Manifests require builder 27 and updater 7.`);
+  }
+  if (!hasCert || !hasPublisher || !hasKey) {
+    throw new Error(`Signed auto-update track blocked: Certificate and signing key required.`);
+  }
+  if (!manifestHasSignature) {
+    throw new Error(`Update Manifest verification failed: latest.yml missing signature block.`);
+  }
+}
+
+// When using builder 26, signed-auto-update MUST block
+assert.throws(() => verifySignedAutoUpdateGates(26, 6, true, 'Test Publisher', true, false), /require builder 27 and updater 7/);
+// When missing manifest signature, it MUST block
+assert.throws(() => verifySignedAutoUpdateGates(27, 7, true, 'Test Publisher', true, false), /missing signature block/);
+// When all requirements are met, it passes
+assert.doesNotThrow(() => verifySignedAutoUpdateGates(27, 7, true, 'Test Publisher', true, true));
+console.log('✓ Signed auto-update gates and manifest validation logic: PASS');
 
 console.log('--- ALL WORKFLOW LOGIC CHECKS PASSED! ---');
