@@ -27,18 +27,24 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Verify release version tag
+      - name: Verify release mode, version, and tag commit
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          $targetTag = "v$version"
-          if ($env:GITHUB_REF -match "^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$") {
-            if ($env:GITHUB_REF_NAME -ne $targetTag) {
-              throw "Triggered tag $env:GITHUB_REF_NAME does not match package.json $targetTag"
+          $mode = "${{ github.event.inputs.release_mode }}"
+          if ($mode -eq 'manual-initial') {
+            if ($version -ne '1.2.0') {
+              throw "manual-initial track is strictly restricted to v1.2.0. Version $version requires signed-auto-update track."
             }
-          } else {
-            Write-Host "Running release workflow for target tag: $targetTag"
           }
+          $targetTag = "v$version"
+          $tagCommit = (git rev-list -n 1 "$targetTag" 2>$null)
+          $headCommit = (git rev-parse HEAD)
+          if ($tagCommit -and $tagCommit -ne $headCommit) {
+            throw "Build commit $headCommit does not match tag $targetTag ($tagCommit)"
+          }
+          Write-Host "Verified release track: $mode for version: $version (Commit: $headCommit)"
 
       - name: Install dependencies
         run: npm ci
@@ -63,6 +69,7 @@ jobs:
           WINDOWS_CERTIFICATE_PUBLISHER: ${{ secrets.WINDOWS_CERTIFICATE_PUBLISHER }}
           ELECTRON_BUILDER_UPDATE_SIGN_KEY: ${{ secrets.UPDATE_MANIFEST_SIGNING_KEY }}
         run: |
+          $ErrorActionPreference = 'Stop'
           if (-not $env:CSC_LINK -or -not $env:WINDOWS_CERTIFICATE_PUBLISHER) {
             throw 'Signed release blocked: Windows code signing certificate and publisher identity are required.'
           }
@@ -79,18 +86,34 @@ jobs:
 
       - name: Verify release artifacts and metadata
         shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_PUBLISHER: ${{ secrets.WINDOWS_CERTIFICATE_PUBLISHER }}
         run: |
+          $ErrorActionPreference = 'Stop'
           $required = @('release/latest.yml')
           if (-not (Test-Path $required[0])) { throw 'electron-builder did not generate latest.yml' }
           if (-not (Get-ChildItem release -Filter '*.blockmap' -File)) { throw 'NSIS blockmap missing' }
           if (-not (Get-ChildItem release -Filter 'Modawwan-Setup-*.exe' -File)) { throw 'NSIS installer missing' }
           if (-not (Get-ChildItem release -Filter 'Modawwan-Portable-*.exe' -File)) { throw 'Portable executable missing' }
 
+          if ("${{ github.event.inputs.release_mode }}" -eq 'signed-auto-update') {
+            $exe = (Get-ChildItem release -Filter 'Modawwan-Setup-*.exe' -File | Where-Object { $_.Name -ne 'Modawwan-Setup.exe' } | Select-Object -First 1).FullName
+            $sig = Get-AuthenticodeSignature $exe
+            if ($sig.Status -ne 'Valid') {
+              throw "Windows Authenticode signature verification failed for $exe (Status: $($sig.Status))"
+            }
+            if ($sig.SignerCertificate.Subject -notmatch [regex]::Escape($env:WINDOWS_CERTIFICATE_PUBLISHER)) {
+              throw "Signer Subject ($($sig.SignerCertificate.Subject)) does not match expected publisher ($env:WINDOWS_CERTIFICATE_PUBLISHER)"
+            }
+            Write-Host "Authenticode signature verified valid for: $($sig.SignerCertificate.Subject)"
+          }
+
       - name: Publish verified release assets
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          $ErrorActionPreference = 'Stop'
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
           $tag = "v$version"
           $setup = (Get-ChildItem release -Filter 'Modawwan-Setup-*.exe' -File | Where-Object { $_.Name -ne 'Modawwan-Setup.exe' } | Select-Object -First 1).FullName
@@ -101,32 +124,36 @@ jobs:
           $existing = (& gh release view $tag --json tagName 2>&1)
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag @assets --clobber
+            if ($LASTEXITCODE -ne 0) { throw "Asset upload failed for release $tag" }
             gh release edit $tag --draft=false --latest
+            if ($LASTEXITCODE -ne 0) { throw "Failed to publish release $tag as latest stable" }
           } else {
             gh release create $tag @assets --title "$tag — Modawwan Productivity Suite" --notes-file CHANGELOG.md --latest
+            if ($LASTEXITCODE -ne 0) { throw "Failed to create release $tag" }
           }
+          Write-Host "Release $tag published and verified successfully!"
 
       - name: Activate direct download buttons in READMEs upon stable release
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          $ErrorActionPreference = 'Stop'
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main:main
-          git checkout main
-          git pull origin main --rebase
+          git fetch origin main
+          git checkout -B main origin/main
 
           $en = Get-Content README.md -Raw
           $ar = Get-Content README.ar.md -Raw
           $directUrl = "https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe"
 
           $en = $en.Replace('Download_for_Windows-Coming_Soon-orange', 'Download_for_Windows-Setup.exe-0078D6')
-          $en = $en.Replace('First Stable Release Coming Soon', 'Free & Open Source • Offline-First')
+          $en = $en.Replace('First Stable Release Coming Soon', 'Offline-First')
           $en = $en -replace '(?s)<a href="https://github.com/husseinezzat0/modawwan/releases">\s*<img src="https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6', "<a href=""$directUrl"">`n    <img src=""https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6"
 
           $ar = $ar.Replace('تحميل_مُدَوَّن_لويندوز-متاح_قريبًا-orange', 'تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6')
-          $ar = $ar.Replace('أول إصدار مستقر قادم قريبًا', 'مجاني ومفتوح المصدر • يعمل بدون إنترنت')
+          $ar = $ar.Replace('أول إصدار مستقر قادم قريبًا', 'يعمل بدون إنترنت')
           $ar = $ar -replace '(?s)<a href="https://github.com/husseinezzat0/modawwan/releases">\s*<img src="https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6', "<a href=""$directUrl"">`n    <img src=""https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6"
 
           Set-Content README.md -Value $en -NoNewline
@@ -137,4 +164,7 @@ jobs:
           if ($diff) {
             git commit -m "docs: activate direct download badge in READMEs for published stable release"
             git push origin main
+            Write-Host "README download badges updated to live Setup.exe link."
+          } else {
+            Write-Host "README download badges already up to date."
           }
