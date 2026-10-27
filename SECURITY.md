@@ -4,7 +4,9 @@
 
 | Version | Supported |
 | --- | --- |
-| 1.0.x | ✅ |
+| 1.2.x | ✅ (Current Stable) |
+| 1.1.x | ⚠️ |
+| 1.0.x | ❌ |
 
 ## Reporting a vulnerability
 
