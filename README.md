@@ -17,14 +17,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe">
-    <img src="https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" />
+  <a href="https://github.com/husseinezzat0/modawwan/releases">
+    <img src="https://img.shields.io/badge/Download_for_Windows-Coming_Soon-orange?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows - Coming Soon" />
   </a>
 </p>
 
 <p align="center">
-  <sub><b>Windows 10 / 11 (64-bit)</b> • Free & Open Source • Offline-First</sub><br />
-  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 View All Releases & Portable Builds</a>
+  <sub><b>Windows 10 / 11 (64-bit)</b> • First Stable Release Coming Soon • Free & Open Source</sub><br />
+  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 Track Releases & Announcements</a>
 </p>
 
 <p align="center">

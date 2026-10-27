@@ -71,3 +71,25 @@ jobs:
           }
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Activate direct download buttons in READMEs upon stable release
+        shell: pwsh
+        run: |
+          $en = Get-Content README.md -Raw
+          $ar = Get-Content README.ar.md -Raw
+          $directUrl = "https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe"
+          $en = $en.Replace('Download_for_Windows-Coming_Soon-orange', 'Download_for_Windows-Setup.exe-0078D6')
+          $en = $en.Replace('First Stable Release Coming Soon', 'Offline-First')
+          $en = $en -replace '(?s)<a href="https://github.com/husseinezzat0/modawwan/releases">\s*<img src="https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6', "<a href=""$directUrl"">`n    <img src=""https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6"
+          $ar = $ar.Replace('تحميل_مُدَوَّن_لويندوز-متاح_قريبًا-orange', 'تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6')
+          $ar = $ar.Replace('أول إصدار مستقر قادم قريبًا', 'يعمل بدون إنترنت')
+          $ar = $ar -replace '(?s)<a href="https://github.com/husseinezzat0/modawwan/releases">\s*<img src="https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6', "<a href=""$directUrl"">`n    <img src=""https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6"
+          Set-Content README.md -Value $en -NoNewline
+          Set-Content README.ar.md -Value $ar -NoNewline
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md README.ar.md
+          $diff = git diff --staged
+          if ($diff) {
+            git commit -m "docs: activate direct download badge in READMEs for published stable release"
+            git push origin main
+          }
