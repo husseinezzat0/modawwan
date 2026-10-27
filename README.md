@@ -170,11 +170,11 @@ Build outputs will be created in the `release/` directory:
 
 ---
 
-## 🔄 Automatic Updates
+## 🔄 Automatic Updates & Signing Status
 
 - **Channel:** Updates are delivered directly through official GitHub Releases.
 - **In-App Detection:** The application automatically checks for and notifies you of new releases.
-- **Manual Installation Notice:** In v1.2.0, because enterprise Windows Authenticode code signing is pending (evaluating community programs like SignPath Foundation), in-app execution safely redirects users to download the official release manually to prevent untrusted binary execution.
+- **Code Signing Status (Pending):** Digital code signing via the **SignPath Foundation** is currently **pending application** and is **not yet active**. Initial release v1.2.0 is distributed as an unsigned community build. In-app execution redirects users to download releases manually to prevent untrusted execution until signing is active.
 - **Differential Downloads:** NSIS blockmaps ensure only binary differences are downloaded, minimizing bandwidth.
 - **Safety First:** The application will never restart unexpectedly. If you have unsaved note edits, pending changes are flushed to SQLite before restart.
 - **User Control:** Automatic background update checks can be toggled on or off at any time in **Settings → Updates**.
@@ -188,6 +188,10 @@ Build outputs will be created in the `release/` directory:
   %APPDATA%\Modawwan\modawwan_notes.sqlite
   ```
 - **Zero Telemetry:** No analytics, no metrics collection, no crash telemetry, and no background network calls.
+- **Comprehensive Policies:**
+  - 🛡️ [Privacy Policy](docs/PRIVACY_POLICY.md) — Detailed offline storage and update network behavior.
+  - ✍️ [Code Signing Policy](docs/CODE_SIGNING_POLICY.md) — Release security, build pipeline, and signing governance.
+  - 🔒 [Security Policy](SECURITY.md) — Vulnerability reporting and isolation standards.
 - **Hardened Electron Security:**
   - Sandboxed renderer process (`sandbox: true`).
   - Strict context isolation (`contextIsolation: true`).

@@ -1,47 +1,67 @@
-# Modawwan — Code Signing & Release Security Policy
+# Modawwan — Code Signing Policy
 
-## 1. Project Overview & Governance
+> **Certificate Status Notice:**
+> The SignPath Foundation code-signing certificate for Modawwan has **NOT** yet been issued. This policy document defines the governance model, release controls, and security architecture required for onboarding and public verification once approved.
+
+---
+
+## 1. Project Governance & Maintainer Identity
 - **Project Name:** Modawwan | مُدَوَّن
 - **Repository:** [https://github.com/husseinezzat0/modawwan](https://github.com/husseinezzat0/modawwan)
-- **Primary Maintainer & Developer:** Hussein Ezzat (حسين عزت)
+- **Author & Sole Maintainer:** Hussein Ezzat (حسين عزت) — GitHub: [@husseinezzat0](https://github.com/husseinezzat0)
 - **License:** MIT License (Open Source Initiative approved)
-- **Application Type:** Offline-first personal productivity desktop application (Notes, Tasks, Finance) for Windows 10/11.
+- **Application Scope:** Offline-first personal desktop productivity application (Notes, Tasks, Personal Finance) for Windows 10/11 (64-bit).
 
 ---
 
-## 2. Open Source Commitment & Distribution
-1. **Public Availability:** The complete source code is maintained publicly on GitHub without closed-source extensions, paywalled components, or telemetry libraries.
-2. **Standard Tooling:** The application is built using standard, publicly auditable tools: Node.js, Vite, React, TypeScript, Electron, and better-sqlite3.
-3. **No Dual-Licensing:** The entire codebase and distributed binaries are governed strictly under the MIT License.
+## 2. Signing Scope & Limitations
+1. **Permitted Artifacts:**
+   Code signing is strictly restricted to binary artifacts compiled directly from this open-source repository:
+   - NSIS Windows Installer: `Modawwan-Setup-<version>.exe` and `Modawwan-Setup.exe`
+   - Unpacked Application Binary: `Modawwan.exe`
+2. **Prohibited Scope:**
+   - No third-party binaries, external dependencies, or modified community binaries may be signed under this project.
+   - Dual-licensing, closed-source additions, or paywalled extensions are strictly prohibited.
+3. **Publisher Identity:**
+   Upon approval by the SignPath Foundation, signed artifacts will carry the verified publisher identity:
+   `CN=SignPath Foundation, O=SignPath Foundation, L=Vienna, C=AT`
+   The matching identifier `SignPath Foundation` will be configured in `app-update.yml` (`publisherName`) for client-side Authenticode verification.
 
 ---
 
-## 3. Build & Release Security Pipeline
-1. **Automated Reproducible Builds:**
-   - All production releases are compiled and packaged exclusively via isolated GitHub Actions runners (`windows-latest`).
-   - Workflows enforce TypeScript strict checks (`npm run typecheck`), automated security and SQLite retention test suites (`npm test`), secret scans, and dependency audits (`npm audit --audit-level=high`) prior to packaging.
-2. **Artifact Integrity:**
-   - Packaging is managed by `electron-builder`.
-   - Every released executable produces an accompanying cryptographic SHA-512 checksum recorded in `latest.yml` and an NSIS blockmap file.
-3. **Access Control:**
-   - Only the repository owner (Hussein Ezzat) has administrative access to tag releases, configure repository secrets, and approve production deployments.
-   - Branch protection and mandatory workflow checks prevent unreviewed direct pushes to stable release tags.
+## 3. Trusted Build Environment & Pipeline Integrity
+1. **Build Source of Truth:**
+   All production builds are compiled exclusively on ephemeral, Microsoft-hosted GitHub Actions runners (`windows-latest`). Local developer workstation builds are never submitted for production signing.
+2. **Deterministic Prerequisites:**
+   Before submission to any signing pipeline, the build workflow enforces:
+   - Strict TypeScript typechecking (`npm run typecheck`).
+   - Comprehensive test suite execution (`npm test` — verifying IPC safety, SQLite persistence, and updater guards).
+   - High-severity dependency vulnerability audit (`npm audit --audit-level=high`).
+   - Cryptographic secret scanner execution (`node test/secrets-scan.cjs`).
+3. **Manual Authorization Required:**
+   Automated continuous deployment is disabled for release signing. Every production release requires explicit manual triggering via `workflow_dispatch` by the maintainer (Hussein Ezzat), binding the exact Git tag (e.g., `v1.3.0`) to the HEAD commit of `main`.
 
 ---
 
-## 4. Code Signing Objectives & Key Management
-1. **Objective:**
-   - Digitally sign the Windows NSIS setup installer (`Modawwan-Setup-*.exe`) and application executable (`Modawwan.exe`) to provide users with cryptographic proof of provenance, ensure tamper-resistance, and eliminate untrusted publisher warnings (SmartScreen).
-2. **Key Security:**
-   - Private signing keys must never be stored in the Git repository, local developer machines, or unencrypted storage.
-   - Signing credentials are to be managed strictly via hardware-backed security modules (HSM) or dedicated signing providers (e.g., SignPath Foundation or Azure Trusted Signing) integrated through GitHub Secrets.
-3. **Revocation & Incident Response:**
-   - In the event of suspected key compromise or vulnerability discovery, releases will be immediately flagged and superseded by an urgent hotfix release, with corresponding revocations processed via the certificate provider.
+## 4. Key Management & Separation of Concerns
+1. **Zero Private Key Storage:**
+   No private signing keys, PFX files, or certificates are stored in the Git repository, local developer systems, or unencrypted storage. Signing credentials remain safely secured within the SignPath Foundation Hardware Security Module (HSM).
+2. **Decoupled Verification Architecture:**
+   - **Windows Authenticode:** Guarantees operating system trust, binary provenance, and suppresses Windows SmartScreen warnings upon user installation.
+   - **Update Manifest Cryptographic Integrity:** Decoupled from Authenticode; update metadata (`latest.yml`) enforces independent HTTPS delivery, SHA-512 binary hashing, and cryptographic Ed25519 manifest signing once stable.
+   - In-app automatic updates remain disabled until both layers are cryptographically verified and tested end-to-end.
 
 ---
 
-## 5. Contact & Security Inquiries
-For security concerns, vulnerability disclosures, or signing verification inquiries:
-- **Developer:** Hussein Ezzat
+## 5. Security Incident & Key Revocation Procedure
+In the event of a suspected security vulnerability, compromised workflow token, or malicious pull request:
+1. The maintainer will immediately revoke active signing tokens in GitHub Repository Secrets.
+2. The SignPath Foundation will be contacted to review and revoke any compromised signatures or certificates.
+3. An advisory will be published via [SECURITY.md](https://github.com/husseinezzat0/modawwan/blob/main/SECURITY.md) and GitHub Releases.
+
+---
+
+## 6. Contact & Public Verification
+- **Maintainer:** Hussein Ezzat
 - **GitHub:** [@husseinezzat0](https://github.com/husseinezzat0)
-- **Policy Reference:** [SECURITY.md](file:///d:/Notes/SECURITY.md)
+- **Security Disclosures:** Refer to [SECURITY.md](https://github.com/husseinezzat0/modawwan/blob/main/SECURITY.md)
