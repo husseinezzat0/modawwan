@@ -173,6 +173,8 @@ Build outputs will be created in the `release/` directory:
 ## 🔄 Automatic Updates
 
 - **Channel:** Updates are delivered directly through official GitHub Releases.
+- **In-App Detection:** The application automatically checks for and notifies you of new releases.
+- **Manual Installation Notice:** In v1.2.0, because enterprise Windows Authenticode code signing is pending (evaluating community programs like SignPath Foundation), in-app execution safely redirects users to download the official release manually to prevent untrusted binary execution.
 - **Differential Downloads:** NSIS blockmaps ensure only binary differences are downloaded, minimizing bandwidth.
 - **Safety First:** The application will never restart unexpectedly. If you have unsaved note edits, pending changes are flushed to SQLite before restart.
 - **User Control:** Automatic background update checks can be toggled on or off at any time in **Settings → Updates**.
