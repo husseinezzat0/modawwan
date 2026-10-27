@@ -16,17 +16,16 @@
   <img src="https://img.shields.io/badge/stack-Electron%20%7C%20React%20%7C%20TypeScript%20%7C%20SQLite-4B32C3.svg" alt="Stack" />
 </p>
 
-<div align="center">
-
-[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe)
-
-<sub><b>Windows 10 / 11 (64-bit)</b> • Free & Open Source • Offline-First</sub>
-
-<p>
-  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 View All Releases & Portable Builds</a>
+<p align="center">
+  <a href="https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe">
+    <img src="https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" />
+  </a>
 </p>
 
-</div>
+<p align="center">
+  <sub><b>Windows 10 / 11 (64-bit)</b> • Free & Open Source • Offline-First</sub><br />
+  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 View All Releases & Portable Builds</a>
+</p>
 
 <p align="center">
   <a href="#-download--installation">Download</a> •

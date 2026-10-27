@@ -18,17 +18,16 @@
   <img src="https://img.shields.io/badge/التقنيات-Electron%20%7C%20React%20%7C%20TypeScript%20%7C%20SQLite-4B32C3.svg" alt="التقنيات" />
 </p>
 
-<div align="center">
-
-[![تحميل مُدَوَّن لويندوز](https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe)
-
-<sub><b>يدعم ويندوز 10 و 11 (64-بت)</b> • مجاني ومفتوح المصدر • يعمل بدون إنترنت</sub>
-
-<p>
-  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 عرض جميع الإصدارات والنسخة المحمولة</a>
+<p align="center">
+  <a href="https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe">
+    <img src="https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="تحميل مُدَوَّن لويندوز" />
+  </a>
 </p>
 
-</div>
+<p align="center">
+  <sub><b>يدعم ويندوز 10 و 11 (64-بت)</b> • مجاني ومفتوح المصدر • يعمل بدون إنترنت</sub><br />
+  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 عرض جميع الإصدارات والنسخة المحمولة</a>
+</p>
 
 <p align="center">
   <a href="#-التحميل-والتثبيت">التحميل والتثبيت</a> •

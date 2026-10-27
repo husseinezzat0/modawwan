@@ -59,9 +59,15 @@ jobs:
         shell: pwsh
         run: |
           $setup = (Get-ChildItem release -Filter 'Modawwan-Setup-*.exe' -File | Where-Object { $_.Name -ne 'Modawwan-Setup.exe' } | Select-Object -First 1).FullName
-          Copy-Item $setup 'release/Modawwan-Setup.exe'
+          Copy-Item $setup 'release/Modawwan-Setup.exe' -Force
           $assets = @(Get-ChildItem release -File | Where-Object { $_.Name -match '^(Modawwan-Setup.*\.exe|Modawwan-Portable.*\.exe|latest\.yml|.*\.blockmap)$' } | ForEach-Object FullName)
           if ($assets.Count -lt 4) { throw 'Expected installer, portable EXE, latest.yml, and blockmap assets' }
-          gh release create $env:GITHUB_REF_NAME @assets --title $env:GITHUB_REF_NAME --notes-file CHANGELOG.md --latest
+          $existing = (& gh release view $env:GITHUB_REF_NAME --json tagName 2>&1)
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:GITHUB_REF_NAME @assets --clobber
+            gh release edit $env:GITHUB_REF_NAME --draft=false --latest
+          } else {
+            gh release create $env:GITHUB_REF_NAME @assets --title $env:GITHUB_REF_NAME --notes-file CHANGELOG.md --latest
+          }
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
