@@ -19,14 +19,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/husseinezzat0/modawwan/releases">
-    <img src="https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-متاح_قريبًا-orange?style=for-the-badge&logo=windows&logoColor=white" alt="تحميل مُدَوَّن لويندوز - متاح قريبًا" />
+  <a href="https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe">
+    <img src="https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="تحميل مُدَوَّن لويندوز" />
   </a>
 </p>
 
 <p align="center">
-  <sub><b>يدعم ويندوز 10 و 11 (64-بت)</b> • أول إصدار مستقر قادم قريبًا • مجاني ومفتوح المصدر</sub><br />
-  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 متابعة الإصدارات والإعلانات الرسمية</a>
+  <sub><b>يدعم ويندوز 10 و 11 (64-بت)</b> • يعمل بدون إنترنت • مجاني ومفتوح المصدر</sub><br />
+  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 عرض جميع الإصدارات والنسخة المحمولة</a>
 </p>
 
 <p align="center">
