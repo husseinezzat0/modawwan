@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+release/
+builder-debug.yml
+
+# Local QA / scratch data reused during development (Electron user-data copies, DBs, logs)
+scratch/
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
+# Certificates & signing artifacts
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Databases / user data — never commit
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# OS / editor noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*

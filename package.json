@@ -1,0 +1,113 @@
+{
+  "name": "modawwan-notes",
+  "version": "1.2.0",
+  "description": "Modawwan — personal productivity suite for notes, tasks, and finance on Windows | مُدَوَّن — تطبيق سطح مكتب للإنتاجية والملاحظات والمهام وإدارة المالية",
+  "main": "src/main/main.cjs",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"cross-env NODE_ENV=development VITE_DEV_SERVER_URL=http://localhost:5173 wait-on tcp:5173 && electron .\"",
+    "dev:web": "vite",
+    "build": "vite build",
+    "build:icons": "node scripts/generate_icons.cjs",
+    "build:win": "npm run build:icons && vite build && electron-builder --config build/publish.config.cjs --win --x64",
+    "pack": "npm run build:icons && vite build && electron-builder --dir",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/security.cjs test/updater.cjs && node test/verify_db.js && node test/icons.cjs",
+    "test:update": "node test/real-update-test.cjs",
+    "test:ui": "node scripts/test-ui.cjs"
+  },
+  "build": {
+    "appId": "com.modawwan.notes",
+    "productName": "Modawwan",
+    "copyright": "© 2026 Hussein Ezzat",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/renderer/**/*",
+      "src/main/**/*",
+      "src/preload/**/*",
+      "build/icon.ico",
+      "build/icon.png",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "executableName": "Modawwan",
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "requestedExecutionLevel": "asInvoker",
+      "legalTrademarks": "Modawwan | مُدَوَّن"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "uninstallDisplayName": "Modawwan | مُدَوَّن",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Modawwan | مُدَوَّن",
+      "runAfterFinish": true,
+      "installerHeaderIcon": "build/icon.ico",
+      "artifactName": "Modawwan-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Modawwan-Portable-${version}.${ext}"
+    },
+    "publish": [
+      {
+        "releaseType": "release",
+        "repo": "modawwan",
+        "owner": "husseinezzat0",
+        "provider": "github"
+      }
+    ],
+    "extraResources": [
+      {
+        "to": "LICENSE",
+        "from": "LICENSE"
+      },
+      {
+        "to": "THIRD_PARTY_NOTICES.md",
+        "from": "THIRD_PARTY_NOTICES.md"
+      }
+    ]
+  },
+  "keywords": [
+    "notes",
+    "tasks",
+    "kanban",
+    "finance",
+    "productivity",
+    "windows",
+    "electron",
+    "sqlite"
+  ],
+  "author": "Hussein Ezzat",
+  "license": "MIT",
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "canvas-confetti": "^1.9.4",
+    "electron-updater": "^6.8.11",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "electron": "^45.0.0",
+    "electron-builder": "^26.18.0",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.5",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "wait-on": "^8.0.1"
+  }
+}

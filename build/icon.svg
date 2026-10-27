@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Modawwan — geometric meem</title>
+  <desc>A single ink-coloured Arabic meem on a flat amber tile, with an open counter and descending margin.</desc>
+  <rect x="16" y="16" width="480" height="480" rx="104" fill="#d97706"/>
+  <path fill="#1c1d21" fill-rule="evenodd" d="M144 352V240H240V208C240 172.654 268.654 144 304 144S368 172.654 368 208V272H176V352ZM272 240H336V208C336 190.327 321.673 176 304 176S272 190.327 272 208Z"/>
+</svg>
