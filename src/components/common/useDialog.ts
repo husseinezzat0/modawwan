@@ -10,7 +10,7 @@ export function useDialog(open: boolean, onClose: () => void) {
     (focusable()[0] || ref.current)?.focus();
     const keydown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || document.querySelector('.custom-select-popup')) return;
-      if (event.key === 'Escape') { event.preventDefault(); close.current(); }
+      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close.current(); }
       if (event.key === 'Tab') {
         const elements = focusable(); const first = elements[0]; const last = elements[elements.length - 1];
         if (!first) { event.preventDefault(); return; }

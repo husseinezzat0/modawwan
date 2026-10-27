@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export interface DonutSlice {
   label: string;
@@ -22,8 +23,9 @@ export const SvgDonutChart: React.FC<SvgDonutChartProps> = ({
   thickness = 28,
   centerLabel,
   centerSublabel,
-  emptyText = 'لا توجد بيانات',
+  emptyText,
 }) => {
+  const { t } = useLanguage();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const total = slices.reduce((acc, s) => acc + s.value, 0);
@@ -44,7 +46,7 @@ export const SvgDonutChart: React.FC<SvgDonutChartProps> = ({
             strokeWidth={thickness}
           />
         </svg>
-        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: '-110px' }}>{emptyText}</span>
+        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: '-110px' }}>{emptyText || t('empty')}</span>
       </div>
     );
   }

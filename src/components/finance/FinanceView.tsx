@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { categoryKey, categoryLabel } from '../../i18n/translations';
+import React, { useEffect, useState } from 'react';
 import { useDatabase } from '../../context/DatabaseContext';
 import { useNavigation } from '../../context/NavigationContext';
 import { Transaction, TransactionType } from '../../types';
@@ -20,6 +21,12 @@ export const FinanceView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
+  useEffect(() => {
+    if (categoryFilter !== 'all') {
+      setCategoryFilter((prev) => categoryLabel(prev, language));
+    }
+  }, [language]);
+
   const handleSaveTransaction = async (data: any) => {
     if (editingTransaction) {
       await updateTransaction(editingTransaction.id, data);
@@ -31,7 +38,7 @@ export const FinanceView: React.FC = () => {
   // Filter transactions
   const filteredTransactions = transactions.filter((tx) => {
     if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
-    if (categoryFilter !== 'all' && tx.category !== categoryFilter) return false;
+    if (categoryFilter !== 'all' && categoryKey(tx.category) !== categoryKey(categoryFilter)) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return tx.title.toLowerCase().includes(q) || tx.notes.toLowerCase().includes(q) || tx.category.toLowerCase().includes(q);
@@ -43,7 +50,7 @@ export const FinanceView: React.FC = () => {
   const categoryColors = ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
   const expenseSlices: DonutSlice[] =
     financeStats?.expenseCategories.map((c, idx) => ({
-      label: c.category,
+      label: categoryLabel(c.category, language),
       value: c.total_cents,
       formattedValue: formatCurrency(c.total_cents),
       color: categoryColors[idx % categoryColors.length],
@@ -65,12 +72,15 @@ export const FinanceView: React.FC = () => {
 
   const allCategories = language === 'ar'
     ? ['all', 'راتب', 'عمل حر', 'طعام', 'سكن', 'فواتير', 'تسوق', 'مواصلات', 'صحة', 'استثمار', 'أخرى']
-    : ['all', 'Salary', 'Freelance', 'Food', 'Housing', 'Bills', 'Shopping', 'Transport', 'Health', 'Invest', 'Other'];
+    : ['all', 'Salary', 'Freelance', 'Food', 'Housing', 'Bills', 'Shopping', 'Transport', 'Health', 'Investments', 'Other'];
 
   const categoryOptions = allCategories.map((c) => ({
-    value: c,
-    label: c === 'all' ? (language === 'ar' ? 'جميع التصنيفات' : 'All Categories') : c,
+    value: c === 'all' ? 'all' : (categoryKey(c) === categoryKey(categoryFilter) ? categoryFilter : c),
+    label: c === 'all' ? (language === 'ar' ? 'جميع التصنيفات' : 'All Categories') : categoryLabel(c, language),
   }));
+  if (categoryFilter !== 'all' && !categoryOptions.some((o) => categoryKey(o.value) === categoryKey(categoryFilter))) {
+    categoryOptions.push({ value: categoryFilter, label: categoryLabel(categoryFilter, language) });
+  }
 
   return (
     <div
@@ -526,7 +536,7 @@ export const FinanceView: React.FC = () => {
                             fontWeight: 600,
                           }}
                         >
-                          {tx.category}
+                          {categoryLabel(tx.category, language)}
                         </span>
                       </td>
 
@@ -555,7 +565,7 @@ export const FinanceView: React.FC = () => {
                           </button>
                           <button
                             onClick={() => {
-                              if (confirm(`هل أنت متأكد من حذف المعاملة "${tx.title}"؟`)) {
+                              if (confirm(t('deleteTransactionConfirm').replace('{name}', tx.title))) {
                                 deleteTransaction(tx.id);
                               }
                             }}

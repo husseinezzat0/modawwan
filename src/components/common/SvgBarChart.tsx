@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { formatCurrency } from '../../utils/formatters';
 
 export interface BarGroup {
@@ -13,12 +14,13 @@ interface SvgBarChartProps {
 }
 
 export const SvgBarChart: React.FC<SvgBarChartProps> = ({ data, height = 220 }) => {
+  const { t } = useLanguage();
   const [hoveredItem, setHoveredItem] = useState<{ index: number; type: 'income' | 'expense' } | null>(null);
 
   if (!data || data.length === 0) {
     return (
       <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-        لا توجد بيانات شهرية متاحة
+        {t('noMonthlyData')}
       </div>
     );
   }
@@ -32,11 +34,11 @@ export const SvgBarChart: React.FC<SvgBarChartProps> = ({ data, height = 220 }) 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '16px', marginBottom: '8px', fontSize: 'var(--text-xs)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--color-success)' }} />
-          <span>الدخل</span>
+          <span>{t('financeIncome')}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--color-danger)' }} />
-          <span>المصروفات</span>
+          <span>{t('financeExpense')}</span>
         </div>
       </div>
 
@@ -76,8 +78,8 @@ export const SvgBarChart: React.FC<SvgBarChartProps> = ({ data, height = 220 }) 
                     pointerEvents: 'none',
                   }}
                 >
-                  <div style={{ color: 'var(--color-success)' }}>دخل: {formatCurrency(item.incomeCents)}</div>
-                  <div style={{ color: 'var(--color-danger)' }}>صرف: {formatCurrency(item.expenseCents)}</div>
+                  <div style={{ color: 'var(--color-success)' }}>{t('financeIncome')}: {formatCurrency(item.incomeCents)}</div>
+                  <div style={{ color: 'var(--color-danger)' }}>{t('financeExpense')}: {formatCurrency(item.expenseCents)}</div>
                 </div>
               )}
 

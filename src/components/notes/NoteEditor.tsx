@@ -9,13 +9,13 @@ import { sanitizeHtml } from '../../utils/sanitizeHtml';
 import { usePreferences } from '../../context/PreferencesContext';
 import { CustomSelect } from '../common/CustomSelect';
 
-export const NoteEditor: React.FC = () => {
+export const NoteEditor: React.FC<{ isFullscreen: boolean; setIsFullscreen: (value: boolean) => void }> = ({ isFullscreen, setIsFullscreen }) => {
   const { notes, activeNote, setActiveNote, updateActiveNote, createNote, deleteNote, togglePinNote, toggleFavoriteNote, folders } = useDatabase();
   const { preferences } = usePreferences();
   const { language, t } = useLanguage();
 
   const editorRef = useRef<HTMLDivElement>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+
   const [title, setTitle] = useState('');
   const [slashMenuPos, setSlashMenuPos] = useState<{ top: number; left: number } | null>(null);
 
@@ -334,7 +334,7 @@ export const NoteEditor: React.FC = () => {
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: isFullscreen ? '40px 12%' : '24px 36px',
+          padding: isFullscreen ? '24px clamp(16px, 4vw, 48px)' : '24px 36px',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',

@@ -1,6 +1,16 @@
 export type Language = 'ar' | 'en';
 
 export interface TranslationDictionary {
+  searchOptions: string;
+  searchOptionsPlaceholder: string;
+  noResults: string;
+  calloutPlaceholder: string;
+  arabicLanguage: string;
+  rtlDescription: string;
+  deleteFolderConfirm: string;
+  deleteTransactionConfirm: string;
+  invalidAmount: string;
+  noMonthlyData: string;
   // App General
   appName: string;
   appTagline: string;
@@ -203,6 +213,16 @@ export interface TranslationDictionary {
 
 export const translations: Record<Language, TranslationDictionary> = {
   ar: {
+    searchOptions: 'بحث الخيارات',
+    searchOptionsPlaceholder: 'بحث…',
+    noResults: 'لا توجد نتائج',
+    calloutPlaceholder: 'اكتب الملاحظة المهمة هنا...',
+    arabicLanguage: 'العربية',
+    rtlDescription: 'RTL (من اليمين لليسار)',
+    deleteFolderConfirm: 'هل أنت متأكد من حذف المجلد "{name}"؟ ستنتقل ملاحظاته إلى الملاحظات العامة.',
+    deleteTransactionConfirm: 'هل أنت متأكد من حذف المعاملة "{name}"؟',
+    invalidAmount: 'يرجى إدخال مبلغ صحيح أكبر من الصفر',
+    noMonthlyData: 'لا توجد بيانات شهرية متاحة',
     appName: 'مُدَوَّن',
     appTagline: 'تطبيق التدوين والإنتاجية وإدارة المهام والمالية',
     save: 'حفظ',
@@ -383,6 +403,16 @@ export const translations: Record<Language, TranslationDictionary> = {
     shortcutsTitle: 'اختصارات لوحة المفاتيح',
   },
   en: {
+    searchOptions: 'Search options',
+    searchOptionsPlaceholder: 'Search…',
+    noResults: 'No results',
+    calloutPlaceholder: 'Write your note here...',
+    arabicLanguage: 'Arabic',
+    rtlDescription: 'RTL (Right to left)',
+    deleteFolderConfirm: 'Delete folder "{name}"? Its notes will move to all notes.',
+    deleteTransactionConfirm: 'Delete transaction "{name}"?',
+    invalidAmount: 'Enter a valid amount greater than zero.',
+    noMonthlyData: 'No monthly data available',
     appName: 'Modawwan',
     appTagline: 'Productivity, Notes, Tasks & Finance Desktop Workspace',
     save: 'Save',
@@ -563,3 +593,19 @@ export const translations: Record<Language, TranslationDictionary> = {
     shortcutsTitle: 'Keyboard Shortcuts',
   },
 };
+
+// Built-in category labels may already be stored in either language. Preserve the stored value.
+const categoryPairs: [string, string, ...string[]][] = [
+  ['عمل', 'Work'], ['شخصي', 'Personal'], ['دراسة', 'Study'], ['مشاريع', 'Projects'],
+  ['صحة', 'Health'], ['مالية', 'Finance'], ['عام', 'General'], ['راتب', 'Salary'],
+  ['عمل حر', 'Freelance'], ['استثمار', 'Investments', 'Invest'], ['مكافأة', 'Bonus'],
+  ['أخرى', 'Other'], ['طعام', 'Food'], ['سكن', 'Housing'], ['فواتير', 'Bills'],
+  ['تسوق', 'Shopping'], ['مواصلات', 'Transport'], ['تعليم', 'Education'], ['ترفيه', 'Entertainment'],
+];
+export function categoryKey(value: string): string {
+  return categoryPairs.find(pair => pair.includes(value))?.[0] ?? value;
+}
+export function categoryLabel(value: string, language: Language): string {
+  const pair = categoryPairs.find(item => item.includes(value));
+  return pair ? pair[language === 'ar' ? 0 : 1] : value;
+}

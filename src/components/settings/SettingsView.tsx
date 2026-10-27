@@ -199,8 +199,8 @@ export const SettingsView: React.FC = () => {
                   cursor: 'pointer',
                 }}
               >
-                <span style={{ fontSize: 'var(--text-sm)' }}>العربية</span>
-                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>RTL (من اليمين لليسار)</span>
+                <span style={{ fontSize: 'var(--text-sm)' }}>{t('arabicLanguage')}</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{t('rtlDescription')}</span>
               </button>
 
               <button
@@ -238,7 +238,7 @@ export const SettingsView: React.FC = () => {
                 aria-label={ar ? 'لغة التطبيق' : 'Application language'}
                 value={language}
                 options={[
-                  { value: 'ar', label: 'العربية — RTL' },
+                  { value: 'ar', label: t('arabicLanguage') + ' — RTL' },
                   { value: 'en', label: 'English — LTR' },
                 ]}
                 onChange={event => setLanguage(event.target.value as 'ar' | 'en')}

@@ -1,3 +1,4 @@
+import { categoryKey, categoryLabel } from '../../i18n/translations';
 import { useDialog } from '../common/useDialog';
 import React, { useState } from 'react';
 import { Transaction, TransactionType } from '../../types';
@@ -54,7 +55,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     : ['طعام', 'سكن', 'فواتير', 'تسوق', 'مواصلات', 'صحة', 'تعليم', 'ترفيه', 'أخرى'];
 
   const categories = type === 'income' ? incomeCategories : expenseCategories;
-  const categoryOptions = categories.map((c) => ({ value: c, label: c }));
+  const categoryOptions = categories.map((c) => ({ value: categoryKey(c) === categoryKey(category) ? category : c, label: categoryLabel(c, language) }));
+  if (!categoryOptions.some(option => option.value === category)) categoryOptions.push({ value: category, label: categoryLabel(category, language) });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +64,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
     const amount_cents = parseCurrencyToCents(amountStr);
     if (amount_cents <= 0) {
-      alert('يرجى إدخال مبلغ صحيح أكبر من الصفر');
+      alert(t('invalidAmount'));
       return;
     }
 

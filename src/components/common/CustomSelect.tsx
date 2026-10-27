@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { AppIcon } from './AppIcon';
 import { IconName } from './iconsMap';
 export interface SelectOption { value: string; label: string; dot?: string; disabled?: boolean; }
@@ -7,6 +8,7 @@ export interface CustomSelectProps extends React.SelectHTMLAttributes<HTMLSelect
   options?: SelectOption[]; leadingIcon?: IconName; error?: boolean; selectSize?: 'sm' | 'md' | 'lg'; wrapperStyle?: React.CSSProperties;
 }
 export const CustomSelect: React.FC<CustomSelectProps> = ({ options, children, leadingIcon, error, selectSize = 'md', wrapperStyle, style, className = '', disabled, value, defaultValue, id, ...rest }) => {
+  const { language, t } = useLanguage();
   const uid = useId(); const controlId = id || `select-${uid}`; const listId = `${controlId}-list`;
   const button = useRef<HTMLButtonElement>(null); const native = useRef<HTMLSelectElement>(null); const popup = useRef<HTMLDivElement>(null);
   const search = useRef<HTMLInputElement>(null); const typeahead = useRef({ text: '', at: 0 });
@@ -47,7 +49,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ options, children, l
       const below = innerHeight - rect.bottom - 12; const above = rect.top - 12;
       const upwards = below < 220 && above > below; const height = Math.max(40, Math.min(300, upwards ? above : below));
       const width = Math.min(Math.max(rect.width, 180), innerWidth - 16);
-      const rtl = getComputedStyle(button.current!).direction === 'rtl';
+      const rtl = language === 'ar';
       const left = Math.max(8, Math.min(rtl ? rect.right - width : rect.left, innerWidth - width - 8));
       setPosition({ position: 'fixed', left, width, maxHeight: height, ...(upwards ? { bottom: innerHeight - rect.top + 6 } : { top: rect.bottom + 6 }), direction: rtl ? 'rtl' : 'ltr' });
     };
@@ -57,7 +59,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ options, children, l
     document.addEventListener('pointerdown', dismiss); document.addEventListener('focusin', dismiss); window.addEventListener('resize', place); window.addEventListener('scroll', scroll, true);
     if (items.length >= 8) search.current?.focus(); else popup.current?.querySelector<HTMLElement>('[role=listbox]')?.focus();
     return () => { document.removeEventListener('pointerdown', dismiss); document.removeEventListener('focusin', dismiss); window.removeEventListener('resize', place); window.removeEventListener('scroll', scroll, true); };
-  }, [open, items.length]);
+  }, [open, items.length, language]);
   useEffect(() => { if (disabled) close(); }, [disabled]);
   useEffect(() => { if (open) document.getElementById(`${listId}-${active}`)?.scrollIntoView({ block: 'nearest' }); }, [active, open, listId]);
   const keydown = (event: React.KeyboardEvent) => {
@@ -87,7 +89,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ options, children, l
       <span className="custom-select-value">{selectedOption?.label || '\u00a0'}</span><AppIcon name="arrowDown" size={14} />
     </button>
     {open && createPortal(<div ref={popup} className="custom-select-popup" style={position} onKeyDown={keydown}>
-      {items.length >= 8 && <input ref={search} className="custom-select-search" aria-label={document.documentElement.lang === 'ar' ? 'بحث الخيارات' : 'Search options'} aria-controls={listId} aria-activedescendant={`${listId}-${active}`} placeholder={document.documentElement.lang === 'ar' ? 'بحث…' : 'Search…'} value={query} onChange={event => { setQuery(event.target.value); setActive(0); }} />}
+      {items.length >= 8 && <input ref={search} className="custom-select-search" aria-label={t('searchOptions')} aria-controls={listId} aria-activedescendant={`${listId}-${active}`} placeholder={t('searchOptionsPlaceholder')} value={query} onChange={event => { setQuery(event.target.value); setActive(0); }} />}
       <div role="listbox" id={listId} tabIndex={-1} aria-label={rest['aria-label'] || rest.title || 'Options'} aria-activedescendant={`${listId}-${active}`} className="custom-select-options">
         {filtered.map((item, index) => <div key={item.value} id={`${listId}-${index}`} role="option" aria-selected={item.value === selected} aria-disabled={item.disabled || undefined} className={`custom-select-option ${index === active ? 'is-active' : ''}`} onPointerMove={() => !item.disabled && setActive(index)} onMouseDown={event => event.preventDefault()} onClick={() => choose(index)}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
@@ -96,7 +98,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ options, children, l
           </span>
           {item.value === selected && <AppIcon name="tick" size={16} />}
         </div>)}
-        {!filtered.length && <div className="custom-select-empty" role="status">{document.documentElement.lang === 'ar' ? 'لا توجد نتائج' : 'No results'}</div>}
+        {!filtered.length && <div className="custom-select-empty" role="status">{t('noResults')}</div>}
       </div>
     </div>, document.body)}
   </div>;

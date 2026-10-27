@@ -35,13 +35,13 @@ const UpdateNotice: React.FC = () => {
   </div>;
 };
 
-const MainContent: React.FC = () => {
+const MainContent: React.FC<{ expanded: boolean; setExpanded: (value: boolean) => void }> = ({ expanded, setExpanded }) => {
   const { currentView } = useNavigation();
 
   return (
     <main style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
       <UpdateNotice />
-      {currentView === 'notes' && <NotesView />}
+      {currentView === 'notes' && <NotesView expanded={expanded} setExpanded={setExpanded} />}
       {currentView === 'tasks' && <TasksView />}
       {currentView === 'finance' && <FinanceView />}
       {currentView === 'trash' && <TrashView />}
@@ -50,20 +50,30 @@ const MainContent: React.FC = () => {
   );
 };
 
+const AppLayout: React.FC = () => {
+  const [expanded, setExpanded] = useState(false);
+  const { currentView } = useNavigation();
+  useEffect(() => { if (currentView !== 'notes') setExpanded(false); }, [currentView]);
+  useEffect(() => {
+    if (!expanded) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.isComposing) return;
+      if (document.querySelector('[role="dialog"]') || document.querySelector('.custom-select-popup')) return;
+      if (event.key === 'Escape') setExpanded(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [expanded]);
+  return <div className="app-container"><TitleBar /><div className="app-body">{!expanded && <Sidebar />}<MainContent expanded={expanded} setExpanded={setExpanded} /></div><ShortcutsModal /></div>;
+};
+
 export const App: React.FC = () => {
   return (
     <LanguageProvider>
       <ThemeProvider>
         <PreferencesProvider><DatabaseProvider>
           <NavigationProvider>
-            <div className="app-container">
-              <TitleBar />
-              <div className="app-body">
-                <Sidebar />
-                <MainContent />
-              </div>
-              <ShortcutsModal />
-            </div>
+            <AppLayout />
           </NavigationProvider>
         </DatabaseProvider></PreferencesProvider>
       </ThemeProvider>

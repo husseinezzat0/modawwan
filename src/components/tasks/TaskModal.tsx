@@ -1,3 +1,4 @@
+import { categoryKey, categoryLabel } from '../../i18n/translations';
 import { useDialog } from '../common/useDialog';
 import React, { useState } from 'react';
 import { Task, TaskPriority } from '../../types';
@@ -69,7 +70,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     { value: 'low', label: isEn ? 'Low' : 'منخفض', dot: 'var(--color-success)' },
   ];
 
-  const categoryOptions = categories.map((c) => ({ value: c, label: c }));
+  const categoryOptions = categories.map((c) => ({ value: categoryKey(c) === categoryKey(category) ? category : c, label: categoryLabel(c, language) }));
+  if (!categoryOptions.some(option => option.value === category)) categoryOptions.push({ value: category, label: categoryLabel(category, language) });
 
   return (
     <div

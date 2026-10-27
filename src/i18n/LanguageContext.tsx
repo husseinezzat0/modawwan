@@ -1,5 +1,5 @@
 import { api } from '../db/apiClient';
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Language, TranslationDictionary, translations } from './translations';
 
 interface LanguageContextType {
@@ -15,6 +15,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const STORAGE_KEY = 'modawwan_language';
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const applyLanguage = (lang: Language) => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.body.dir = document.documentElement.dir;
+    setLanguageState(lang);
+  };
   const [language, setLanguageState] = useState<Language>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -23,7 +29,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return 'ar';
   });
 
-  useEffect(() => { api.getSetting('language', null).then(saved => { if (saved === 'ar' || saved === 'en') setLanguageState(saved); }).catch(console.error); }, []);
+  const changed = useRef(false);
+  const pendingSave = useRef<Promise<unknown>>(Promise.resolve());
+  useEffect(() => { api.getSetting('language', null).then(saved => { if (!changed.current && (saved === 'ar' || saved === 'en')) applyLanguage(saved); }).catch(console.error); }, []);
 
   const dir: 'rtl' | 'ltr' = language === 'ar' ? 'rtl' : 'ltr';
 
@@ -37,7 +45,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [language, dir]);
 
   const setLanguage = (lang: Language) => {
-    api.setSetting('language', lang).then(() => setLanguageState(lang)).catch(console.error);
+    changed.current = true;
+    applyLanguage(lang);
+    pendingSave.current = pendingSave.current.then(() => api.setSetting('language', lang)).catch(console.error);
   };
 
   const toggleLanguage = () => {

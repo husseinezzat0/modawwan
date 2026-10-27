@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { categoryKey, categoryLabel } from '../../i18n/translations';
+import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { useDatabase } from '../../context/DatabaseContext';
 import { useNavigation } from '../../context/NavigationContext';
@@ -21,6 +22,12 @@ export const TasksView: React.FC = () => {
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  useEffect(() => {
+    if (selectedCategory !== 'all') {
+      setSelectedCategory((prev) => categoryLabel(prev, language));
+    }
+  }, [language]);
 
   // Calendar State
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
@@ -53,7 +60,7 @@ export const TasksView: React.FC = () => {
   const filteredTasks = tasks.filter((t) => {
     if (activeTab === 'pending' && t.is_completed) return false;
     if (activeTab === 'completed' && !t.is_completed) return false;
-    if (selectedCategory !== 'all' && t.category !== selectedCategory) return false;
+    if (selectedCategory !== 'all' && categoryKey(t.category) !== categoryKey(selectedCategory)) return false;
     if (selectedPriority !== 'all' && t.priority !== selectedPriority) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -73,7 +80,7 @@ export const TasksView: React.FC = () => {
   const categoryColors = ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#ef4444', '#14b8a6'];
   const categorySlices: DonutSlice[] =
     taskStats?.categories.map((c, idx) => ({
-      label: c.category,
+      label: categoryLabel(c.category, language),
       value: c.count,
       color: categoryColors[idx % categoryColors.length],
     })) || [];
@@ -96,9 +103,12 @@ export const TasksView: React.FC = () => {
     : ['all', 'Work', 'Personal', 'Study', 'Projects', 'Health', 'Finance', 'General'];
 
   const categoryOptions = categories.map((c) => ({
-    value: c,
-    label: c === 'all' ? (language === 'ar' ? 'جميع التصنيفات' : 'All Categories') : c,
+    value: c === 'all' ? 'all' : (categoryKey(c) === categoryKey(selectedCategory) ? selectedCategory : c),
+    label: c === 'all' ? (language === 'ar' ? 'جميع التصنيفات' : 'All Categories') : categoryLabel(c, language),
   }));
+  if (selectedCategory !== 'all' && !categoryOptions.some((o) => categoryKey(o.value) === categoryKey(selectedCategory))) {
+    categoryOptions.push({ value: selectedCategory, label: categoryLabel(selectedCategory, language) });
+  }
 
   const priorityOptions = [
     { value: 'all', label: language === 'ar' ? 'جميع الأولويات' : 'All Priorities' },
@@ -509,7 +519,7 @@ export const TasksView: React.FC = () => {
                             fontWeight: 600,
                           }}
                         >
-                          {task.category}
+                          {categoryLabel(task.category, language)}
                         </span>
                       </div>
 
@@ -623,7 +633,7 @@ export const TasksView: React.FC = () => {
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>{task.category}</span>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>{categoryLabel(task.category, language)}</span>
                       {getPriorityBadge(task.priority)}
                     </div>
                     <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-main)' }}>{task.title}</div>
@@ -694,7 +704,7 @@ export const TasksView: React.FC = () => {
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>{task.category}</span>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>{categoryLabel(task.category, language)}</span>
                       {getPriorityBadge(task.priority)}
                     </div>
                     <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-main)' }}>{task.title}</div>
@@ -765,7 +775,7 @@ export const TasksView: React.FC = () => {
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{task.category}</span>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{categoryLabel(task.category, language)}</span>
                       <span style={{ fontSize: '10px', color: 'var(--color-success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AppIcon name="tick" size={11} /> {t('taskCompleted')}</span>
                     </div>
                     <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-main)', textDecoration: 'line-through' }}>{task.title}</div>

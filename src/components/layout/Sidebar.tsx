@@ -284,7 +284,7 @@ export const Sidebar: React.FC = () => {
                     onClick={() => setIsAddingFolder(false)}
                     style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}
                   >
-                    إلغاء
+                    {t('cancel')}
                   </button>
                   <button
                     type="submit"
@@ -297,7 +297,7 @@ export const Sidebar: React.FC = () => {
                       fontWeight: 700,
                     }}
                   >
-                    حفظ
+                    {t('save')}
                   </button>
                 </div>
               </div>
@@ -407,7 +407,7 @@ export const Sidebar: React.FC = () => {
                       </button>
                       <button
                         onClick={async () => {
-                          if (confirm(`هل أنت متأكد من حذف المجلد "${folder.name}"؟ ستنتقل ملاحظاته إلى الملاحظات العامة.`)) {
+                          if (confirm(t('deleteFolderConfirm').replace('{name}', folder.name))) {
                             await deleteFolder(folder.id);
                           }
                           setActiveMenuFolderId(null);
