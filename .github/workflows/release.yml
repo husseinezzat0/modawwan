@@ -58,7 +58,9 @@ jobs:
       - name: Publish verified stable release and update assets
         shell: pwsh
         run: |
-          $assets = @(Get-ChildItem release -File | Where-Object { $_.Name -match '^(Modawwan-Setup-.*\.exe|Modawwan-Portable-.*\.exe|latest\.yml|.*\.blockmap)$' } | ForEach-Object FullName)
+          $setup = (Get-ChildItem release -Filter 'Modawwan-Setup-*.exe' -File | Where-Object { $_.Name -ne 'Modawwan-Setup.exe' } | Select-Object -First 1).FullName
+          Copy-Item $setup 'release/Modawwan-Setup.exe'
+          $assets = @(Get-ChildItem release -File | Where-Object { $_.Name -match '^(Modawwan-Setup.*\.exe|Modawwan-Portable.*\.exe|latest\.yml|.*\.blockmap)$' } | ForEach-Object FullName)
           if ($assets.Count -lt 4) { throw 'Expected installer, portable EXE, latest.yml, and blockmap assets' }
           gh release create $env:GITHUB_REF_NAME @assets --title $env:GITHUB_REF_NAME --notes-file CHANGELOG.md --latest
         env:

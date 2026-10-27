@@ -16,6 +16,18 @@
   <img src="https://img.shields.io/badge/stack-Electron%20%7C%20React%20%7C%20TypeScript%20%7C%20SQLite-4B32C3.svg" alt="Stack" />
 </p>
 
+<div align="center">
+
+[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe)
+
+<sub><b>Windows 10 / 11 (64-bit)</b> • Free & Open Source • Offline-First</sub>
+
+<p>
+  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 View All Releases & Portable Builds</a>
+</p>
+
+</div>
+
 <p align="center">
   <a href="#-download--installation">Download</a> •
   <a href="#-screenshots">Screenshots</a> •
@@ -71,9 +83,9 @@ No accounts, no external cloud dependencies, no trackers, and no subscription pa
 
 ## 📥 Download & Installation
 
-Visit the [GitHub Releases page](https://github.com/husseinezzat0/modawwan/releases) to download the latest certified build for Windows.
+Download the [**Windows Setup Installer (Modawwan-Setup.exe)**](https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe) directly, or explore all assets on the [GitHub Releases page](https://github.com/husseinezzat0/modawwan/releases).
 
-- **NSIS Setup Installer (`Modawwan-Setup-1.2.0.exe`)**:
+- **NSIS Setup Installer (`Modawwan-Setup.exe`)**:
   - Full desktop integration with Start Menu and Desktop shortcuts.
   - Per-user installation requiring **no administrator privileges**.
   - Built-in incremental updater support.

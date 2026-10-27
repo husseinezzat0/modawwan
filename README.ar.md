@@ -18,6 +18,18 @@
   <img src="https://img.shields.io/badge/التقنيات-Electron%20%7C%20React%20%7C%20TypeScript%20%7C%20SQLite-4B32C3.svg" alt="التقنيات" />
 </p>
 
+<div align="center">
+
+[![تحميل مُدَوَّن لويندوز](https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe)
+
+<sub><b>يدعم ويندوز 10 و 11 (64-بت)</b> • مجاني ومفتوح المصدر • يعمل بدون إنترنت</sub>
+
+<p>
+  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 عرض جميع الإصدارات والنسخة المحمولة</a>
+</p>
+
+</div>
+
 <p align="center">
   <a href="#-التحميل-والتثبيت">التحميل والتثبيت</a> •
   <a href="#-لقطات-الشاشة">لقطات الشاشة</a> •
@@ -73,9 +85,9 @@
 
 ## 📥 التحميل والتثبيت
 
-تفضل بزيارة صفحة [الإصدارات على GitHub](https://github.com/husseinezzat0/modawwan/releases) لتحميل أحدث نسخة معتمدة:
+حمّل [**مثبت ويندوز المباشر (Modawwan-Setup.exe)**](https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe) فوراً، أو تصفح كافة الملفات والنسخة المحمولة عبر [صفحة الإصدارات على GitHub](https://github.com/husseinezzat0/modawwan/releases).
 
-- **نسخة التثبيت الرسمية (`Modawwan-Setup-1.2.0.exe`)**:
+- **نسخة التثبيت الرسمية (`Modawwan-Setup.exe`)**:
   - تثبيت سريع لنظام ويندوز مع اختصارات سطح المكتب وقائمة ابدأ.
   - لا يتطلب صلاحيات مسؤول (Administrator).
   - يدعم التحديثات التلقائية المدمجة.
