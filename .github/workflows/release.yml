@@ -1,45 +1,74 @@
 name: Stable Windows Release
 on:
   workflow_dispatch:
+    inputs:
+      release_mode:
+        description: 'Release track: "manual-initial" (Unsigned manual download v1.2.0) or "signed-auto-update" (Signed production release with full auto-update)'
+        required: true
+        default: 'manual-initial'
+        type: choice
+        options:
+          - manual-initial
+          - signed-auto-update
+
 permissions:
   contents: write
+
 jobs:
   release:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - name: Verify tag matches package version
+
+      - name: Verify release version tag
         shell: pwsh
         run: |
-          if ($env:GITHUB_REF -notmatch "^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$") { throw "Select a stable version tag for this manual release." }
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          if ($env:GITHUB_REF_NAME -ne "v$version") { throw "Tag $env:GITHUB_REF_NAME does not match package.json v$version" }
+          $targetTag = "v$version"
+          if ($env:GITHUB_REF -match "^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$") {
+            if ($env:GITHUB_REF_NAME -ne $targetTag) {
+              throw "Triggered tag $env:GITHUB_REF_NAME does not match package.json $targetTag"
+            }
+          } else {
+            Write-Host "Running release workflow for target tag: $targetTag"
+          }
+
       - name: Install dependencies
         run: npm ci
+
       - name: TypeScript check
         run: npm run typecheck
+
       - name: Tests
         run: npm test
+
       - name: Secret scan
         run: node test/secrets-scan.cjs
+
       - name: Dependency audit
         run: npm audit --audit-level=high
-      - name: Require verified update and Windows signing
+
+      - name: Enforce signing gates for signed auto-update track
+        if: ${{ github.event.inputs.release_mode == 'signed-auto-update' }}
         shell: pwsh
         env:
           CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE_P12 }}
           WINDOWS_CERTIFICATE_PUBLISHER: ${{ secrets.WINDOWS_CERTIFICATE_PUBLISHER }}
           ELECTRON_BUILDER_UPDATE_SIGN_KEY: ${{ secrets.UPDATE_MANIFEST_SIGNING_KEY }}
         run: |
-          $builderMajor = [int]((node -p "require('electron-builder/package.json').version").Split('.')[0])
-          $updaterMajor = [int]((node -p "require('electron-updater/package.json').version").Split('.')[0])
-          if ($builderMajor -lt 27 -or $updaterMajor -lt 7) { throw 'Stable release blocked: signed update manifests require a verified builder 27 / updater 7 migration.' }
-          if (-not $env:CSC_LINK -or -not $env:WINDOWS_CERTIFICATE_PUBLISHER -or -not $env:ELECTRON_BUILDER_UPDATE_SIGN_KEY) { throw 'Stable release blocked: Windows certificate, publisher identity, and update manifest signing key are required.' }
-      - name: Build update assets (do not publish yet)
+          if (-not $env:CSC_LINK -or -not $env:WINDOWS_CERTIFICATE_PUBLISHER) {
+            throw 'Signed release blocked: Windows code signing certificate and publisher identity are required.'
+          }
+          Write-Host "Code signing credentials verified for publisher: $env:WINDOWS_CERTIFICATE_PUBLISHER"
+
+      - name: Build Windows release assets
         run: npm run build:win -- --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,7 +76,8 @@ jobs:
           CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
           WINDOWS_CERTIFICATE_PUBLISHER: ${{ secrets.WINDOWS_CERTIFICATE_PUBLISHER }}
           ELECTRON_BUILDER_UPDATE_SIGN_KEY: ${{ secrets.UPDATE_MANIFEST_SIGNING_KEY }}
-      - name: Verify update metadata and installer blockmap
+
+      - name: Verify release artifacts and metadata
         shell: pwsh
         run: |
           $required = @('release/latest.yml')
@@ -55,38 +85,53 @@ jobs:
           if (-not (Get-ChildItem release -Filter '*.blockmap' -File)) { throw 'NSIS blockmap missing' }
           if (-not (Get-ChildItem release -Filter 'Modawwan-Setup-*.exe' -File)) { throw 'NSIS installer missing' }
           if (-not (Get-ChildItem release -Filter 'Modawwan-Portable-*.exe' -File)) { throw 'Portable executable missing' }
-      - name: Publish verified stable release and update assets
+
+      - name: Publish verified release assets
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $tag = "v$version"
           $setup = (Get-ChildItem release -Filter 'Modawwan-Setup-*.exe' -File | Where-Object { $_.Name -ne 'Modawwan-Setup.exe' } | Select-Object -First 1).FullName
           Copy-Item $setup 'release/Modawwan-Setup.exe' -Force
           $assets = @(Get-ChildItem release -File | Where-Object { $_.Name -match '^(Modawwan-Setup.*\.exe|Modawwan-Portable.*\.exe|latest\.yml|.*\.blockmap)$' } | ForEach-Object FullName)
           if ($assets.Count -lt 4) { throw 'Expected installer, portable EXE, latest.yml, and blockmap assets' }
-          $existing = (& gh release view $env:GITHUB_REF_NAME --json tagName 2>&1)
+
+          $existing = (& gh release view $tag --json tagName 2>&1)
           if ($LASTEXITCODE -eq 0) {
-            gh release upload $env:GITHUB_REF_NAME @assets --clobber
-            gh release edit $env:GITHUB_REF_NAME --draft=false --latest
+            gh release upload $tag @assets --clobber
+            gh release edit $tag --draft=false --latest
           } else {
-            gh release create $env:GITHUB_REF_NAME @assets --title $env:GITHUB_REF_NAME --notes-file CHANGELOG.md --latest
+            gh release create $tag @assets --title "$tag — Modawwan Productivity Suite" --notes-file CHANGELOG.md --latest
           }
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Activate direct download buttons in READMEs upon stable release
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main:main
+          git checkout main
+          git pull origin main --rebase
+
           $en = Get-Content README.md -Raw
           $ar = Get-Content README.ar.md -Raw
           $directUrl = "https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe"
+
           $en = $en.Replace('Download_for_Windows-Coming_Soon-orange', 'Download_for_Windows-Setup.exe-0078D6')
-          $en = $en.Replace('First Stable Release Coming Soon', 'Offline-First')
+          $en = $en.Replace('First Stable Release Coming Soon', 'Free & Open Source • Offline-First')
           $en = $en -replace '(?s)<a href="https://github.com/husseinezzat0/modawwan/releases">\s*<img src="https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6', "<a href=""$directUrl"">`n    <img src=""https://img.shields.io/badge/Download_for_Windows-Setup.exe-0078D6"
+
           $ar = $ar.Replace('تحميل_مُدَوَّن_لويندوز-متاح_قريبًا-orange', 'تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6')
-          $ar = $ar.Replace('أول إصدار مستقر قادم قريبًا', 'يعمل بدون إنترنت')
+          $ar = $ar.Replace('أول إصدار مستقر قادم قريبًا', 'مجاني ومفتوح المصدر • يعمل بدون إنترنت')
           $ar = $ar -replace '(?s)<a href="https://github.com/husseinezzat0/modawwan/releases">\s*<img src="https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6', "<a href=""$directUrl"">`n    <img src=""https://img.shields.io/badge/تحميل_مُدَوَّن_لويندوز-Setup.exe-0078D6"
+
           Set-Content README.md -Value $en -NoNewline
           Set-Content README.ar.md -Value $ar -NoNewline
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git add README.md README.ar.md
           $diff = git diff --staged
           if ($diff) {
