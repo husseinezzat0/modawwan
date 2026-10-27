@@ -1,0 +1,52 @@
+name: SignPath Production Release (Template)
+
+# This workflow is a reference template to be activated once SignPath Foundation approval is granted.
+# Prerequisites:
+# 1. SignPath Foundation project approval
+# 2. Repository secrets: SIGNPATH_API_TOKEN, SIGNPATH_ORGANIZATION_ID, SIGNPATH_PROJECT_SLUG, SIGNPATH_SIGNING_POLICY_SLUG
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-sign:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify tests and security gates
+        run: |
+          npm run typecheck
+          npm test
+          node test/secrets-scan.cjs
+
+      - name: Package application (unsigned stage)
+        run: npm run build:win -- --publish never
+
+      - name: Upload unsigned installer for SignPath
+        id: upload-unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-installer
+          path: release/Modawwan-Setup-*.exe
+
+      # - name: Submit signing request to SignPath
+      #   uses: signpath/github-action-submit-signing-request@v3
+      #   with:
+      #     api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+      #     organization-id: '${{ secrets.SIGNPATH_ORGANIZATION_ID }}'
+      #     project-slug: '${{ secrets.SIGNPATH_PROJECT_SLUG }}'
+      #     signing-policy-slug: '${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}'
+      #     github-artifact-id: '${{ steps.upload-unsigned.outputs.artifact-id }}'
+      #     wait-for-completion: true
+      #     output-artifact-directory: './signed-release'
