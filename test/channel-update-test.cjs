@@ -8,6 +8,9 @@ const { spawn } = require('node:child_process');
 const PORT = 8999;
 const releaseDir = path.resolve('release');
 const testDir = path.resolve('scratch/channel-update-test');
+if (fs.existsSync(testDir)) {
+  fs.rmSync(testDir, { recursive: true, force: true });
+}
 const userDataDir = path.join(testDir, 'userdata');
 fs.mkdirSync(userDataDir, { recursive: true });
 
