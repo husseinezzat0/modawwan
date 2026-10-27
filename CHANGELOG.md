@@ -6,16 +6,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.2.0] — 2026-10-27
 
 ### Added
-- Automatic update checks for stable GitHub Releases with an opt-out, limited to once per 24 hours, with release notes, download progress, and an explicit Install & Restart action after pending note edits flush.
-- Arabic and English update settings; portable builds link to Releases and require manual replacement.
+- In-app automatic update checks for stable GitHub Releases (opt-out, throttled to once per 24 hours) with release notes and notifications in Settings.
+- Arabic and English update settings; portable source builds query Releases directly.
 - Windows Actions workflows for checks on `main` and tagged stable releases, including version, security, and package-metadata gates.
 
 ### Changed
 - Replaced the prior icon set with MIT-licensed Phosphor icons to enable public redistribution; original application branding is retained.
-- Existing 1.1.0 and earlier installations must install this update-capable version manually once.
+- In-app update execution (`quitAndInstall`) is intentionally blocked in v1.2.0 pending SignPath Foundation code signing approval; update notifications safely direct users to download and install releases manually.
+- Existing 1.1.0 and earlier installations must install this initial open-source release manually.
 
 ### Security
-- Updates are downloaded only from the configured public GitHub repository over HTTPS and are never installed without an explicit user action. Windows code signing remains optional and must be configured through repository secrets.
+- Update queries are conducted strictly over HTTPS against the official GitHub repository metadata and manifest. In-app execution is gated behind verified publisher signatures, ensuring unsigned binaries are never executed automatically.
 
 ## [1.1.0] — 2026-10-26
 

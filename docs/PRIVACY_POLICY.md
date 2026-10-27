@@ -34,16 +34,19 @@ Modawwan contains:
 ## 4. Network Communications (Update Checks) | الاتصالات الشبكية (فحص التحديثات)
 The application initiates network communication **only** for checking software updates, under the following strict conditions:
 
-1. **Endpoint & Protocol:**
-   - Update availability is queried exclusively over encrypted HTTPS from the official GitHub Releases API:
-     https://api.github.com/repos/husseinezzat0/modawwan/releases/latest
-     and the GitHub Releases asset feed.
-2. **Payload & Data Transmitted:**
+1. **Trigger Mechanisms (Periodic & Manual):**
+   - **Periodic Background Check:** When enabled, the application automatically queries for new releases once every 24 hours while running. Upon application startup, a check is performed only if 24 hours have elapsed since the recorded timestamp (`lastUpdateCheckAt`).
+   - **Manual On-Demand Check:** The user can initiate an immediate check at any time by clicking **Check for Updates (التحقق من التحديثات)** in **Settings → Updates (الإعدادات ← التحديثات)**.
+2. **Endpoints & Protocol:**
+   - Update availability is queried exclusively over encrypted HTTPS directly from the official GitHub infrastructure:
+     - Update manifest: https://github.com/husseinezzat0/modawwan/releases/latest/download/latest.yml
+     - Release metadata: https://api.github.com/repos/husseinezzat0/modawwan/releases/latest
+3. **Payload & Data Transmitted:**
    - The update request transmits **NO** personal data, **NO** notes, **NO** tasks, **NO** financial figures, and **NO** hardware/device identifiers.
    - The request contains only generic HTTP headers (`Accept: application/vnd.github+json` and User-Agent `Modawwan-Update-Check`) to query the latest release metadata.
-3. **User Control & Disabling:**
+4. **User Control & Disabling:**
    - Automatic update checking can be completely disabled at any time by toggling off **Automatic Update Checks (التحقق التلقائي من التحديثات)** in **Settings → Updates (الإعدادات ← التحديثات)**.
-   - When enabled, checks are throttled to a minimum interval of 24 hours.
+   - When disabled, background network communication is completely stopped.
 
 ---
 

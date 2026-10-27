@@ -24,16 +24,16 @@
 
 <p align="center">
   <sub><b>Windows 10 / 11 (64-bit)</b> • Offline-First • Free & Open Source</sub><br />
-  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 View All Releases & Portable Builds</a>
+  <a href="https://github.com/husseinezzat0/modawwan/releases">📦 View All Releases & Release Notes</a>
 </p>
 
 <p align="center">
-  <a href="#-download--installation">Download</a> •
-  <a href="#-screenshots">Screenshots</a> •
-  <a href="#-features">Features</a> •
-  <a href="#-technology-stack">Tech Stack</a> •
-  <a href="#-development-setup">Development</a> •
-  <a href="#-automatic-updates">Auto-Updates</a> •
+  <a href="#download--installation">Download</a> •
+  <a href="#screenshots">Screenshots</a> •
+  <a href="#features">Features</a> •
+  <a href="#technology-stack">Tech Stack</a> •
+  <a href="#development-setup">Development</a> •
+  <a href="#automatic-updates--signing-status">Auto-Updates</a> •
   <a href="README.ar.md"><strong>النسخة العربية (Arabic README)</strong></a>
 </p>
 
@@ -82,16 +82,14 @@ No accounts, no external cloud dependencies, no trackers, and no subscription pa
 
 ## 📥 Download & Installation
 
-Download the [**Windows Setup Installer (Modawwan-Setup.exe)**](https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe) directly, or explore all assets on the [GitHub Releases page](https://github.com/husseinezzat0/modawwan/releases).
+Download the official [**Windows Setup Installer (Modawwan-Setup.exe)**](https://github.com/husseinezzat0/modawwan/releases/latest/download/Modawwan-Setup.exe) directly, or view the release notes on the [GitHub Releases page](https://github.com/husseinezzat0/modawwan/releases).
 
 - **NSIS Setup Installer (`Modawwan-Setup.exe`)**:
-  - Full desktop integration with Start Menu and Desktop shortcuts.
+  - Primary release asset for Windows 10/11 (64-bit).
   - Per-user installation requiring **no administrator privileges**.
-  - Built-in incremental updater support.
-  - Uninstalling preserves your SQLite database intact.
-- **Portable Version (`Modawwan-Portable-1.2.0.exe`)**:
-  - Standalone single executable.
-  - Runs anywhere without installation.
+  - Full desktop integration with Start Menu and Desktop shortcuts.
+  - Uninstalling preserves your local SQLite database intact.
+  - *Note on Portable Build:* A standalone portable executable is not distributed as a pre-packaged release asset for v1.2.0; it can be compiled locally from source using `npm run build:win`.
 
 ---
 
@@ -172,11 +170,12 @@ Build outputs will be created in the `release/` directory:
 
 ## 🔄 Automatic Updates & Signing Status
 
-- **Channel:** Updates are delivered directly through official GitHub Releases.
-- **In-App Detection:** The application automatically checks for and notifies you of new releases.
-- **Code Signing Status (Pending):** Digital code signing via the **SignPath Foundation** is currently **pending application** and is **not yet active**. Initial release v1.2.0 is distributed as an unsigned community build. In-app execution redirects users to download releases manually to prevent untrusted execution until signing is active.
-- **Differential Downloads:** NSIS blockmaps ensure only binary differences are downloaded, minimizing bandwidth.
-- **Safety First:** The application will never restart unexpectedly. If you have unsaved note edits, pending changes are flushed to SQLite before restart.
+- **Channel:** Updates are published exclusively through official GitHub Releases.
+- **In-App Detection:** The application automatically checks for new stable releases in the background (or manually on demand) and displays update notifications and release notes in Settings.
+- **Manual Installation for v1.2.0:** Because code signing is currently in progress, automated in-app execution (`quitAndInstall`) is intentionally blocked in v1.2.0 to protect user systems. The application safely directs you to download and run the new installer manually.
+- **Code Signing Status (Submitted — Awaiting Review):** The application to the **SignPath Foundation** free open-source code signing program has been **Submitted — Awaiting Review**; no certificate has been issued yet. Initial release v1.2.0 is distributed as an unsigned community package. Windows SmartScreen may present an informational prompt upon initial installation until certificate integration and reputation are established.
+- **Differential Downloads:** Future signed updates will utilize NSIS blockmaps to download only binary diffs.
+- **Safety First:** The application never restarts unexpectedly; pending edits are flushed to SQLite before any restart.
 - **User Control:** Automatic background update checks can be toggled on or off at any time in **Settings → Updates**.
 
 ---
