@@ -111,7 +111,7 @@
 | **بيئة التشغيل** | [Electron 45](https://www.electronjs.org/) (معزول وآمن ومحمي) |
 | **الواجهة الأمامية** | [React 19](https://react.dev/)، [TypeScript 5.7](https://www.typescriptlang.org/) |
 | **مجمع الحزم** | [Vite 6](https://vitejs.dev/) |
-| **قاعدة البيانات** | محرك SQLite 3 مدمج بنمط WAL واستعلامات مجهزة |
+| **قاعدة البيانات** | محرك SQLite 3 مدمج عبر `node:sqlite` في Node.js بنمط WAL واستعلامات مجهزة |
 | **الأيقونات** | [Phosphor Icons](https://phosphoricons.com/) بترخيص MIT |
 | **الخطوط** | خط Cairo العربي الحر وخط Inter اللاتيني |
 | **التحزيم والتحديث** | electron-builder وelectron-updater |

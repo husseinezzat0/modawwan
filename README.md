@@ -109,7 +109,7 @@ Download the official [**Windows Setup Installer (Modawwan-Setup.exe)**](https:/
 | **Runtime** | [Electron 45](https://www.electronjs.org/) (Sandboxed, Context-Isolated, Hardened IPC) |
 | **Frontend** | [React 19](https://react.dev/), [TypeScript 5.7](https://www.typescriptlang.org/) |
 | **Bundler** | [Vite 6](https://vitejs.dev/) |
-| **Database** | Embedded SQLite 3 via `src/main/db.cjs` (WAL mode, prepared statements, automatic schema migrations) |
+| **Database** | Embedded SQLite 3 via Node.js built-in `node:sqlite` (`src/main/db.cjs`, WAL mode, prepared statements, automatic schema migrations) |
 | **Icons** | [Phosphor Icons](https://phosphoricons.com/) via `@phosphor-icons/react` (MIT Licensed) |
 | **Typography** | Cairo Variable Font (OFL) for Arabic, Inter Variable Font (OFL) for Latin |
 | **Packaging & Updates** | [electron-builder](https://www.electron.build/), [electron-updater](https://www.electron.build/auto-update) |

@@ -12,6 +12,7 @@
     "pack": "npm run build:icons && vite build && electron-builder --dir",
     "typecheck": "tsc --noEmit",
     "test": "node --test test/security.cjs test/updater.cjs && node test/verify_db.js && node test/icons.cjs",
+    "test:electron": "electron test/i18n-expand-smoke.cjs && electron test/electron-regressions.cjs",
     "test:update": "node test/real-update-test.cjs",
     "test:ui": "node scripts/test-ui.cjs"
   },

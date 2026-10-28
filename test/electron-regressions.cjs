@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const assert = require('node:assert/strict');
 
+app.disableHardwareAcceleration();
+
 const tmpDir = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'modawwan-reg-'));
 app.setPath('userData', tmpDir);
 if (!process.env.VITE_DEV_SERVER_URL) {
@@ -30,6 +32,8 @@ app.on('browser-window-created', (_, win) => {
           await wait(`document.documentElement.lang === '${targetLang}'`);
           await pause(150);
         }
+        const expectedDir = targetLang === 'ar' ? 'rtl' : 'ltr';
+        assert.equal(await js('document.documentElement.dir'), expectedDir, `HTML dir must be ${expectedDir} when lang is ${targetLang}`);
       };
 
       await wait("!!document.querySelector('.note-content-editable')");

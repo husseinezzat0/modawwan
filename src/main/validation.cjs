@@ -20,7 +20,7 @@ function record(table, value, update = false, backup = false) {
     else if (!Number.isSafeInteger(val) || rule === 'money' && val < 0) fail();
   }
   if (!update) {
-    string(value.id); if (!value.id) fail();
+    string(value.id); if (!value.id || !value.id.trim()) fail();
     for (const key of table === 'transactions' ? ['title', 'type', 'amount_cents', 'category', 'date'] : [table === 'folders' ? 'name' : 'title']) {
       if (value[key] === undefined) fail();
     }
@@ -38,7 +38,7 @@ function setting(key, value) {
   }
 }
 function validateBackup(data) {
-  object(data); if (data.version !== 1 || JSON.stringify(data).length > 32000000) fail();
+  object(data); if (data.version !== 1 || Buffer.byteLength(JSON.stringify(data), 'utf8') > 32000000) fail();
   for (const table of Object.keys(fields)) {
     if (!Array.isArray(data[table]) || data[table].length > 100000) fail();
     const ids = new Set();

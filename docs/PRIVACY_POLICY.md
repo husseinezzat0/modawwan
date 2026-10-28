@@ -17,7 +17,7 @@ Modawwan is designed from the ground up as an offline-first, privacy-respecting 
   ```text
   %APPDATA%\Modawwan\modawwan_notes.sqlite
   ```
-- **Local SQLite Engine:** Data is processed through an embedded `better-sqlite3` instance running on your operating system.
+- **Local SQLite Engine:** Data is processed through the built-in Node.js SQLite engine (`node:sqlite` / `DatabaseSync`) in WAL mode with prepared statements, running on your operating system.
 - **Backups & Export:** Any exported JSON backups are written only to directories chosen explicitly by you via the native Windows file picker.
 
 ---

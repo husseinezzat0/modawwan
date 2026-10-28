@@ -28,6 +28,10 @@ jobs:
         run: npm audit --audit-level=high
       - name: Production build
         run: npm run build
+      - name: Electron smoke test
+        run: npx electron test/i18n-expand-smoke.cjs
+      - name: Electron regression test
+        run: npx electron test/electron-regressions.cjs
       - name: Windows packaging verification
         run: npx electron-builder --win --x64 --dir
       - name: Verify packaged application

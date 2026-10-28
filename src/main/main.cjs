@@ -139,7 +139,7 @@ async function confirmRestore() {
 }
 function recoveryBackup() {
   const file = path.join(app.getPath('userData'), `before-restore-${Date.now()}.json`);
-  fs.writeFileSync(file, JSON.stringify(db.exportBackup()), { flag: 'wx' });
+  fs.writeFileSync(file, JSON.stringify(db.exportBackup()), { flag: 'wx' }); return file;
 }
 
 function publishUpdateState(patch) {
@@ -243,9 +243,16 @@ function setupIpcHandlers() {
   // Backup & Restore
   handle('db:exportBackup', () => db.exportBackup());
   handle('db:importBackup', async (event, data) => {
+    validateBackup(data);
     if (!await confirmRestore()) return { success: false, canceled: true };
-    recoveryBackup();
-    return db.importBackup(data);
+    const recoveryPath = recoveryBackup();
+    try {
+      db.importBackup(data);
+      return { success: true, recoveryPath };
+    } catch (err) {
+      console.error('Import failed, database intact/rolled back. Safety snapshot:', recoveryPath, err);
+      throw err;
+    }
   });
 
   handle('dialog:saveBackup', async () => {
@@ -276,9 +283,9 @@ function setupIpcHandlers() {
     const content = fs.readFileSync(filePaths[0], 'utf-8');
     const backupData = validateBackup(JSON.parse(content));
     if (!await confirmRestore()) return { success: false, canceled: true };
-    recoveryBackup();
-    db.importBackup(backupData);
-    return { success: true, filePath: filePaths[0] };
+    const recoveryPath = recoveryBackup();
+    try { db.importBackup(backupData);
+    return { success: true, filePath: filePaths[0], recoveryPath }; } catch (err) { console.error('Import failed, database intact/rolled back. Safety snapshot:', recoveryPath, err); throw err; }
   });
 
   handle('app:getInfo', () => ({ version: app.getVersion(), dataPath: getDatabasePath(), updatesSupported: app.isPackaged }));
